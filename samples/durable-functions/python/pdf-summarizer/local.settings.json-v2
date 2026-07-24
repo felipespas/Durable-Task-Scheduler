@@ -1,0 +1,16 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "AzureWebJobsSecretStorageType": "Files",
+    "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AZURE_TENANT_ID": "16b3c013-d300-468d-ac64-7eda0820b6d3",
+    "DURABLE_TASK_SCHEDULER_CONNECTION_STRING": "Endpoint=https://dts-c3phyppgfox-gdf2bvff.westus2.durabletask.io;Authentication=DefaultAzure",
+    "TASKHUB_NAME": "taskhub-c3phyppgfoxrm",
+    "STORAGE_ACCOUNT_NAME": "stc3phyppgfoxrm",
+    "COGNITIVE_SERVICES_ENDPOINT": "https://cog-di-c3phyppgfoxrm.cognitiveservices.azure.com/",
+    "AZURE_OPENAI_ENDPOINT": "https://cog-c3phyppgfoxrm.openai.azure.com/",
+    "CHAT_MODEL_DEPLOYMENT_NAME": "chat"
+  }
+}
