@@ -264,3 +264,9 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+
+.venv
+*__azurite_db_*__.json
+__blobstorage__/*
+__queuestorage__/*
+local.settings.json*

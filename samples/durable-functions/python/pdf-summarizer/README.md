@@ -5,7 +5,7 @@ This sample integrates various Azure services, including the new Durable Task Sc
 
 The application showcases how PDFs can be ingested and intelligently scanned to determine their content.
 
-![Architecture Diagram](../../../../media/images/architecture_v2.png)
+![Architecture Diagram](architecture_v2.png)
 
 The application's workflow is as follows:
 1.	PDFs are uploaded to a blob storage input container.
@@ -20,7 +20,7 @@ This sample uses **managed identity** for all Azure service connections and does
 
 ## Prerequisites
 
-1. [Python 3.9+](https://www.python.org/downloads/)
+1. [Python 3.11+](https://www.python.org/downloads/)
 2. [Create an active Azure subscription](https://learn.microsoft.com/en-us/azure/guides/developer/azure-developer-guide#understanding-accounts-subscriptions-and-billing).
 3. [Install the latest Azure Functions Core Tools to use the CLI](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local)
 4. [Install Azure Developer CLI (azd)](https://aka.ms/azd) for deployment
@@ -109,7 +109,7 @@ This app leverages Durable Functions to orchestrate the application workflow. By
 
 Take a look at the code snippet below, the `process_document` defines the entire workflow, which consists of a series of steps (activities) that need to be scheduled in sequence. Coordination is key, as the output of one activity is passed as an input to the next. Additionally, Durable Functions handle durability and retries, which ensure that if a failure occurs, such as a transient error or an issue with a dependent service, the workflow can recover gracefully.
 
-![Orchestration Code](../../../../media/images/code.png)
+![Orchestration Code](code.png)
 
 ## Using the app
 To use the app, simply upload a PDF to the Blob Storage `input` container. You can use [Azure Storage Explorer](https://azure.microsoft.com/features/storage-explorer/) to connect to your storage account using your Azure AD credentials (no connection strings or SAS tokens required). Once the PDF is uploaded, it will be processed using document intelligence and Azure OpenAI. The resulting summary will be saved to a new file and uploaded to the `output` container.
@@ -117,9 +117,9 @@ To use the app, simply upload a PDF to the Blob Storage `input` container. You c
 ### Review Execution History in the Durable Task Scheduler Dashboard
 Since the application leverages the Durable Task Scheduler backend storage provider for Durable Functions, all orchestration executions are persisted and can be viewed in the monitoring and management dashboard.
 
-![DTS dashboard](../../../../media/images/dashboard.png)
+![DTS dashboard](dashboard.png)
 
 This dashboard enables you to monitor the status of ongoing and failed orchestrations, and troubleshoot any issues causing orchestrations to fail or become "stuck." It also displays the outputs from each activity execution. Additionally, you can use the timeline and sequence diagrams to gain insights into the orchestration execution, including the duration of each activity.
 
-![DTS activity dashboard](../../../../media/images/activity.png)
-![DTS orchestration sequence](../../../../media/images/sequence.png)
+![DTS activity dashboard](activity.png)
+![DTS orchestration sequence](sequence.png)

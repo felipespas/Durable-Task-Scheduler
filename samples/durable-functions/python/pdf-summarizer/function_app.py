@@ -3,32 +3,90 @@ import os
 from azure.storage.blob import BlobServiceClient
 import azure.functions as func
 import azure.durable_functions as df
-from azure.identity import DefaultAzureCredential
+from azure.identity import DefaultAzureCredential, ManagedIdentityCredential
 from azure.ai.formrecognizer import DocumentAnalysisClient
-import json
-import time
-from requests import get, post
 import requests
 from datetime import datetime
 
 my_app = df.DFApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
-# Use managed identity to access blob storage
-credential = DefaultAzureCredential()
-storage_account_name = os.environ.get("STORAGE_ACCOUNT_NAME")
-if not storage_account_name:
-    raise ValueError("STORAGE_ACCOUNT_NAME environment variable is required but not set")
+_openai_credential = DefaultAzureCredential()
 
-blob_service_client = BlobServiceClient(
-    account_url=f"https://{storage_account_name}.blob.core.windows.net",
-    credential=credential
-)
+def _build_storage_credential():
+    # In Azure, prefer explicit UAMI to avoid credential-chain ambiguity.
+    if os.environ.get("IDENTITY_ENDPOINT") or os.environ.get("MSI_ENDPOINT"):
+        return ManagedIdentityCredential(client_id=os.environ.get("AZURE_CLIENT_ID"))
+    return DefaultAzureCredential()
+
+def _build_blob_service_client():
+    jobs_storage = os.environ.get("AzureWebJobsStorage", "")
+    if "UseDevelopmentStorage=true" in jobs_storage or "127.0.0.1" in jobs_storage or "localhost" in jobs_storage:
+        return BlobServiceClient.from_connection_string(jobs_storage)
+
+    credential = _build_storage_credential()
+    storage_account_name = os.environ.get("STORAGE_ACCOUNT_NAME")
+    if not storage_account_name:
+        raise ValueError("STORAGE_ACCOUNT_NAME environment variable is required but not set")
+
+    return BlobServiceClient(
+        account_url=f"https://{storage_account_name}.blob.core.windows.net",
+        credential=credential
+    )
+
+
+def _summarize_with_azure_openai(text: str):
+    endpoint = os.environ.get("AZURE_OPENAI_ENDPOINT", "").rstrip("/")
+    deployment = os.environ.get("CHAT_MODEL_DEPLOYMENT_NAME", "")
+
+    if not endpoint:
+        raise ValueError("AZURE_OPENAI_ENDPOINT environment variable is required but not set")
+    if not deployment:
+        raise ValueError("CHAT_MODEL_DEPLOYMENT_NAME environment variable is required but not set")
+
+    api_key = os.environ.get("AZURE_OPENAI_KEY")
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+
+    if api_key:
+        headers["api-key"] = api_key
+    else:
+        token = _openai_credential.get_token("https://cognitiveservices.azure.com/.default").token
+        headers["Authorization"] = f"Bearer {token}"
+
+    url = f"{endpoint}/openai/deployments/{deployment}/chat/completions?api-version=2024-10-21"
+    payload = {
+        "messages": [
+            {
+                "role": "system",
+                "content": "You summarize documents concisely and clearly.",
+            },
+            {
+                "role": "user",
+                "content": f"Can you explain what the following text is about? {text}",
+            },
+        ],
+        "temperature": 0.2,
+        "max_tokens": 1000,
+    }
+
+    response = requests.post(url, headers=headers, json=payload, timeout=90)
+    if response.status_code >= 400:
+        logging.error("Azure OpenAI call failed with status %s: %s", response.status_code, response.text[:1000])
+        response.raise_for_status()
+
+    response_json = response.json()
+    content = response_json["choices"][0]["message"]["content"]
+    return {"content": content}
+
+blob_service_client = _build_blob_service_client()
 
 @my_app.blob_trigger(arg_name="myblob", path="input", connection="AzureWebJobsStorage")
 @my_app.durable_client_input(client_name="client")
 async def blob_trigger(myblob: func.InputStream, client):
     logging.info(f"Python blob trigger function processed blob"
-                f"Name: {myblob.name}"
+                f"Name: {myblob.name} "
                 f"Blob Size: {myblob.length} bytes")
 
     blobName = myblob.name.split("/")[1]
@@ -75,12 +133,13 @@ def analyze_pdf(blobName):
 
     return doc
 
+# we removed the binding because it doesn't work with default azure authentication. 
+# Instead, we will use a custom function to leverage the DefaultAzureCredential to get a token and pass it in the header.
 @my_app.activity_trigger(input_name='results')
-@my_app.generic_input_binding(arg_name="response", type="textCompletion", data_type=func.DataType.STRING, prompt="Can you explain what the following text is about? {results}", model = "%CHAT_MODEL_DEPLOYMENT_NAME%")
-def summarize_text(results, response: str):
+def summarize_text(results):
     logging.info(f"in summarize_text activity")
-    response_json = json.loads(response)
-    logging.info(response_json['content'])
+    response_json = _summarize_with_azure_openai(results)
+    logging.info(response_json["content"])
     return response_json
 
 @my_app.activity_trigger(input_name='results')
