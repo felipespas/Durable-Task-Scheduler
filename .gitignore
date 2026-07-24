@@ -440,3 +440,17 @@ out/
 **/infra/**/*.json
 !**/infra/**/*.parameters.json
 !**/infra/**/abbreviations.json
+**/.venv/**
+
+# Azure Storage Emulator
+**/__blobstorage__/**
+**/__azurite_db_queue_extent__.json
+**/__azurite_db_blob__.json
+**/__azurite_db_table__.json
+**/__azurite_db_blob_extent__.json
+**/__azurite_db_queue__.json
+**/__queuestorage__/**
+
+# Azure Durable Functions local settings
+**/local.settings.json-v1
+**/local.settings.json-v2
