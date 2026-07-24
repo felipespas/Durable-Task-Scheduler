@@ -1,0 +1,25 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Functions: Start + Attach (One Click)",
+      "type": "debugpy",
+      "request": "attach",
+      "preLaunchTask": "Start Functions Host and Wait for debugpy",
+      "postDebugTask": "Stop Functions Host",
+      "connect": {
+        "host": "127.0.0.1",
+        "port": 9091
+      },
+      "justMyCode": true
+    },
+    {
+      "name": "Python: Current File",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${file}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}
