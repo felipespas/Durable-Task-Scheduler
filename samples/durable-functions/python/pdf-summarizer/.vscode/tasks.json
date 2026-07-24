@@ -1,0 +1,39 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "func: host start (debugpy)",
+      "type": "shell",
+      "command": "$env:VIRTUAL_ENV='${workspaceFolder}\\.venv'; $env:PATH='${workspaceFolder}\\.venv\\Scripts;' + $env:PATH; $env:languageWorkers__python__defaultExecutablePath='${workspaceFolder}\\.venv\\Scripts\\python.exe'; $env:languageWorkers__python__arguments='-m debugpy --listen 9091'; func start --python --verbose",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "custom",
+        "fileLocation": [
+          "relative",
+          "${workspaceFolder}"
+        ],
+        "pattern": {
+          "regexp": "^(?!x)x$",
+          "file": 1,
+          "line": 1,
+          "column": 1,
+          "message": 1
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": ".*(Host lock lease acquired|Worker process started and initialized).*"
+        }
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "func: host stop",
+      "type": "shell",
+      "command": "Get-Process func -ErrorAction SilentlyContinue | Stop-Process -Force"
+    }
+  ]
+}

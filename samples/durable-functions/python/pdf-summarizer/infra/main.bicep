@@ -86,7 +86,7 @@ param chatDeploymentCapacity int = 0
 var chatModel = {
   modelName: !empty(chatModelName) ? chatModelName : startsWith(openAiHost, 'azure') ? 'gpt-4o' : 'gpt-4o'
   deploymentName: !empty(chatDeploymentName) ? chatDeploymentName : 'chat'
-  deploymentVersion: !empty(chatDeploymentVersion) ? chatDeploymentVersion : '2024-08-06'
+  deploymentVersion: !empty(chatDeploymentVersion) ? chatDeploymentVersion : '2024-11-20'
   deploymentCapacity: chatDeploymentCapacity != 0 ? chatDeploymentCapacity : 28
 }
 
@@ -142,7 +142,7 @@ module durableFunction './app/durable-function.bicep' = {
     applicationInsightsName: monitoring.outputs.applicationInsightsName
     appServicePlanId: appServicePlan.outputs.id
     runtimeName: 'python'
-    runtimeVersion: '3.9'
+    runtimeVersion: '3.11'
     storageAccountName: storage.outputs.name
     identityId: durableFunctionUserAssignedIdentity.outputs.identityId
     identityClientId: durableFunctionUserAssignedIdentity.outputs.identityClientId
@@ -182,6 +182,8 @@ module storage './core/storage/storage-account.bicep' = {
 }
 
 var storageRoleDefinitionId  = 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b' //Storage Blob Data Owner role
+var storageQueueRoleDefinitionId = '974c5e8b-45b9-4653-ba55-5f855dd0fb88' //Storage Queue Data Contributor role
+var storageTableRoleDefinitionId = '0a9a7e1f-b9d0-4cc4-a60d-0319b160aaa3' //Storage Table Data Contributor role
 
 // Allow access from durable function to storage account using a user assigned managed identity
 module storageRoleAssignmentApiUAMI 'app/storage-Access.bicep' = {
@@ -195,6 +197,30 @@ module storageRoleAssignmentApiUAMI 'app/storage-Access.bicep' = {
   }
 }
 
+// Allow queue access from durable function to storage account using a user assigned managed identity
+module storageQueueRoleAssignmentApiUAMI 'app/storage-Access.bicep' = {
+  name: 'storageQueueRoleAssignmentPocessorUAMI'
+  scope: rg
+  params: {
+    storageAccountName: storage.outputs.name
+    roleDefinitionID: storageQueueRoleDefinitionId
+    principalID: durableFunctionUserAssignedIdentity.outputs.identityPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
+// Allow table access from durable function to storage account using a user assigned managed identity
+module storageTableRoleAssignmentApiUAMI 'app/storage-Access.bicep' = {
+  name: 'storageTableRoleAssignmentPocessorUAMI'
+  scope: rg
+  params: {
+    storageAccountName: storage.outputs.name
+    roleDefinitionID: storageTableRoleDefinitionId
+    principalID: durableFunctionUserAssignedIdentity.outputs.identityPrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // Allow access from durable function to storage account using the Login identity of this bicep (usually AZD CLI)
 module storageRoleAssignmentApi 'app/storage-Access.bicep' = {
   name: 'storageRoleAssignmentDurableFunctionLoginIdentity'
@@ -202,6 +228,30 @@ module storageRoleAssignmentApi 'app/storage-Access.bicep' = {
   params: {
     storageAccountName: storage.outputs.name
     roleDefinitionID: storageRoleDefinitionId
+    principalID: principalId
+    principalType: 'User'
+  }
+}
+
+// Allow queue access from durable function to storage account using the Login identity of this bicep (usually AZD CLI)
+module storageQueueRoleAssignmentApi 'app/storage-Access.bicep' = {
+  name: 'storageQueueRoleAssignmentDurableFunctionLoginIdentity'
+  scope: rg
+  params: {
+    storageAccountName: storage.outputs.name
+    roleDefinitionID: storageQueueRoleDefinitionId
+    principalID: principalId
+    principalType: 'User'
+  }
+}
+
+// Allow table access from durable function to storage account using the Login identity of this bicep (usually AZD CLI)
+module storageTableRoleAssignmentApi 'app/storage-Access.bicep' = {
+  name: 'storageTableRoleAssignmentDurableFunctionLoginIdentity'
+  scope: rg
+  params: {
+    storageAccountName: storage.outputs.name
+    roleDefinitionID: storageTableRoleDefinitionId
     principalID: principalId
     principalType: 'User'
   }
