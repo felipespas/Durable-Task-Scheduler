@@ -6,14 +6,11 @@ using Microsoft.Extensions.Azure;
 using Microsoft.Extensions.Logging;
 using Azure.Identity;
 using TravelPlannerFunctions.Services;
-using Azure.AI.Projects;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication()
     .ConfigureServices(services =>
     {
-        services.AddApplicationInsightsTelemetryWorkerService();
-        services.ConfigureFunctionsApplicationInsights();
         services.AddLogging();
         
         services.AddSingleton<DestinationRecommenderService>((serviceProvider) =>
@@ -49,15 +46,18 @@ var host = new HostBuilder()
             var tenantId = Environment.GetEnvironmentVariable("AZURE_TENANT_ID");
             var clientId = Environment.GetEnvironmentVariable("AZURE_CLIENT_ID");
 
-            ArgumentNullException.ThrowIfNullOrEmpty(tenantId, nameof(tenantId));
-            ArgumentNullException.ThrowIfNullOrEmpty(clientId, nameof(clientId));
-
-            // Use the same credentials for all clients. 
-            clientBuilder.UseCredential(new DefaultAzureCredential(new DefaultAzureCredentialOptions
+            if (!string.IsNullOrWhiteSpace(tenantId) && !string.IsNullOrWhiteSpace(clientId))
             {
-                TenantId = tenantId,
-                ManagedIdentityClientId = clientId
-            }));
+                clientBuilder.UseCredential(new DefaultAzureCredential(new DefaultAzureCredentialOptions
+                {
+                    TenantId = tenantId,
+                    ManagedIdentityClientId = clientId
+                }));
+            }
+            else
+            {
+                clientBuilder.UseCredential(new DefaultAzureCredential());
+            }
 
             // If running in local development with Azurite emulator
             var connectionString = Environment.GetEnvironmentVariable("AzureWebJobsStorage");
