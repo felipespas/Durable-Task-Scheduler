@@ -201,6 +201,58 @@ public abstract class BaseAgentService : IAgentService
                 var client = projectClient.GetPersistentAgentsClient();
                 Logger.LogInformation($"Successfully created PersistentAgentsClient for agent {AgentId}");
 
+                string runAgentId = AgentId;
+
+                try
+                {
+                    Logger.LogInformation("Validating configured AgentId '{ConfiguredAgentId}' using direct lookup.", AgentId);
+                    var existingAgent = await client.Administration.GetAgentAsync(AgentId, CancellationToken.None);
+                    runAgentId = existingAgent.Value.Id;
+                    Logger.LogInformation("Configured AgentId '{ConfiguredAgentId}' exists and will be used.", runAgentId);
+                }
+                catch (RequestFailedException ex) when (ex.Status == (int)HttpStatusCode.NotFound)
+                {
+                    var model = Environment.GetEnvironmentVariable("FOUNDRY_AGENT_MODEL")
+                        ?? Environment.GetEnvironmentVariable("AZURE_OPENAI_DEPLOYMENT_NAME")
+                        ?? Environment.GetEnvironmentVariable("AZURE_AI_MODEL_DEPLOYMENT");
+
+                    if (string.IsNullOrWhiteSpace(model))
+                    {
+                        throw new InvalidOperationException(
+                            "Agent not found and no model is configured to create one. Set FOUNDRY_AGENT_MODEL (or AZURE_OPENAI_DEPLOYMENT_NAME)."
+                        );
+                    }
+
+                    var autoAgentName = $"auto-{AgentId}";
+                    var autoAgentInstructions = GetAutoCreateInstructions();
+                    Logger.LogWarning("Configured AgentId '{ConfiguredAgentId}' was not found. Creating a new agent named '{AgentName}' with model '{Model}'.", AgentId, autoAgentName, model);
+
+                    var createdAgent = await client.Administration.CreateAgentAsync(
+                        model,
+                        autoAgentName,
+                        $"Auto-created agent for configured id '{AgentId}'",
+                        autoAgentInstructions,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        new Dictionary<string, string>
+                        {
+                            ["createdBy"] = "AiAgentTravelPlanOrchestrator",
+                            ["sourceAgentId"] = AgentId
+                        },
+                        CancellationToken.None);
+
+                    runAgentId = createdAgent.Value.Id;
+                    Logger.LogInformation("Created agent successfully. Name={AgentName}, Id={AgentId}", createdAgent.Value.Name, runAgentId);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex, "Error validating or creating agent for configured AgentId '{ConfiguredAgentId}'", AgentId);
+                    throw;
+                }                
+
                 // Create a thread
                 PersistentAgentThread thread = await client.Threads.CreateThreadAsync();
                 string threadId = thread.Id;
@@ -212,10 +264,12 @@ public abstract class BaseAgentService : IAgentService
                     MessageRole.User,
                     prompt);
 
+                Logger.LogInformation($"AgentId={AgentId}");
+
                 // Create a run with the agent using the agent ID
                 ThreadRun run = await client.Runs.CreateRunAsync(
                     threadId,
-                    AgentId);
+                    runAgentId);
 
                 Logger.LogInformation($"Created run, run ID: {run.Id}");
 
@@ -297,5 +351,22 @@ public abstract class BaseAgentService : IAgentService
 
         // Double the delay for the next retry (exponential backoff)
         return retryDelay * 2;
+    }
+
+    private string GetAutoCreateInstructions()
+    {
+        string? instructions = GetType().Name switch
+        {
+            nameof(DestinationRecommenderService) => Environment.GetEnvironmentVariable("DESTINATION_RECOMMENDER_AGENT_INSTRUCTIONS"),
+            nameof(ItineraryPlannerService) => Environment.GetEnvironmentVariable("ITINERARY_PLANNER_AGENT_INSTRUCTIONS"),
+            nameof(LocalRecommendationsService) => Environment.GetEnvironmentVariable("LOCAL_RECOMMENDATIONS_AGENT_INSTRUCTIONS"),
+            _ => null
+        };
+
+        instructions ??= Environment.GetEnvironmentVariable("FOUNDRY_DEFAULT_AGENT_INSTRUCTIONS");
+
+        return string.IsNullOrWhiteSpace(instructions)
+            ? "You are a helpful travel planning assistant."
+            : instructions;
     }
 }

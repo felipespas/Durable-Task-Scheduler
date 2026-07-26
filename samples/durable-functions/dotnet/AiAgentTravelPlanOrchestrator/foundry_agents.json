@@ -1,0 +1,152 @@
+{
+  "data": [
+    {
+      "object": "agent",
+      "id": "local",
+      "name": "local",
+      "state": "enabled",
+      "versions": {
+        "latest": {
+          "metadata": {
+            "logo": "Avatar_Default.svg",
+            "microsoft.voice-live.enabled": "false",
+            "microsoft.voice-live.configuration": "{\"session\":{\"voice\":{\"name\":\"en-US-Ava:DragonHDLatestNeural\",\"type\":\"azure-standard\",\"temperature\":0.8,\"rate\":\"1\",\"isHdVoice\":true},\"inputAudioTranscription\":{\"model\":\"azure-speech\",\"language\":\"auto-detect\"},\"turnDetection\":{\"type\":\"azure_semantic_vad\",\"endOfUtteranceDetection\":null,\"removeFillerWords\":true},\"inputAudioNoiseReduction\":null,\"inputAudioEchoCancellation\":null,\"fillerResponse\":null,\"avatar\":null,\"proactiveEngagement\":false}}",
+            "description": "",
+            "modified_at": "1784993915"
+          },
+          "object": "agent.version",
+          "id": "local:2",
+          "name": "local",
+          "version": "2",
+          "description": "",
+          "created_at": 1784993920,
+          "definition": {
+            "kind": "prompt",
+            "model": "gpt-4o",
+            "instructions": "You are a local guide expert that provides insider knowledge about destinations. Focus on both popular and hidden gem attractions, dining options across different price ranges, and practical local tips that tourists wouldn't typically know.",
+            "tools": [
+              {
+                "type": "web_search"
+              }
+            ]
+          },
+          "draft": false,
+          "status": "active",
+          "instance_identity": {
+            "principal_id": "ab99cb1e-7235-455a-baea-052544574525",
+            "client_id": "ab99cb1e-7235-455a-baea-052544574525"
+          },
+          "blueprint": {
+            "principal_id": "12787d77-0156-46fb-a68c-029d699223c5",
+            "client_id": "e19d0813-6343-4fe4-b540-4c6a4c0e80e7"
+          },
+          "blueprint_reference": {
+            "type": "ManagedAgentIdentityBlueprint",
+            "blueprint_id": "local-0eead"
+          },
+          "agent_guid": "0eead583-f68c-4f3f-895c-56c9902f80f1"
+        }
+      }
+    },
+    {
+      "object": "agent",
+      "id": "itinerary",
+      "name": "itinerary",
+      "state": "enabled",
+      "versions": {
+        "latest": {
+          "metadata": {
+            "logo": "Avatar_Default.svg",
+            "microsoft.voice-live.enabled": "false",
+            "microsoft.voice-live.configuration": "{\"session\":{\"voice\":{\"name\":\"en-US-Ava:DragonHDLatestNeural\",\"type\":\"azure-standard\",\"temperature\":0.8,\"rate\":\"1\",\"isHdVoice\":true},\"inputAudioTranscription\":{\"model\":\"azure-speech\",\"language\":\"auto-detect\"},\"turnDetection\":{\"type\":\"azure_semantic_vad\",\"endOfUtteranceDetection\":null,\"removeFillerWords\":true},\"inputAudioNoiseReduction\":null,\"inputAudioEchoCancellation\":null,\"fillerResponse\":null,\"avatar\":null,\"proactiveEngagement\":false}}",
+            "description": "",
+            "modified_at": "1784993836"
+          },
+          "object": "agent.version",
+          "id": "itinerary:2",
+          "name": "itinerary",
+          "version": "2",
+          "description": "",
+          "created_at": 1784993841,
+          "definition": {
+            "kind": "prompt",
+            "model": "gpt-4o",
+            "instructions": "You are an itinerary planning expert that creates detailed day-by-day travel plans. Generate a comprehensive itinerary for the requested destination including accommodations, activities, transportation, and estimated costs. ",
+            "tools": [
+              {
+                "type": "web_search"
+              }
+            ]
+          },
+          "draft": false,
+          "status": "active",
+          "instance_identity": {
+            "principal_id": "bc6a0d98-5ca5-47f2-a66c-4984812f0695",
+            "client_id": "bc6a0d98-5ca5-47f2-a66c-4984812f0695"
+          },
+          "blueprint": {
+            "principal_id": "79c5d242-6912-4d73-b75e-59e944d40b83",
+            "client_id": "18b4a34b-1910-4f9d-8650-2bdf38c9d553"
+          },
+          "blueprint_reference": {
+            "type": "ManagedAgentIdentityBlueprint",
+            "blueprint_id": "itinerary-a8fca"
+          },
+          "agent_guid": "a8fcae8b-6a7a-48a2-aedd-1a0daef1b403"
+        }
+      }
+    },
+    {
+      "object": "agent",
+      "id": "destination",
+      "name": "destination",
+      "state": "enabled",
+      "versions": {
+        "latest": {
+          "metadata": {
+            "logo": "Avatar_Default.svg",
+            "microsoft.voice-live.enabled": "false",
+            "microsoft.voice-live.configuration": "{\"session\":{\"voice\":{\"name\":\"en-US-Ava:DragonHDLatestNeural\",\"type\":\"azure-standard\",\"temperature\":0.8,\"rate\":\"1\",\"isHdVoice\":true},\"inputAudioTranscription\":{\"model\":\"azure-speech\",\"language\":\"auto-detect\"},\"turnDetection\":{\"type\":\"azure_semantic_vad\",\"endOfUtteranceDetection\":null,\"removeFillerWords\":true},\"inputAudioNoiseReduction\":null,\"inputAudioEchoCancellation\":null,\"fillerResponse\":null,\"avatar\":null,\"proactiveEngagement\":false}}",
+            "description": "",
+            "modified_at": "1784993799"
+          },
+          "object": "agent.version",
+          "id": "destination:2",
+          "name": "destination",
+          "version": "2",
+          "description": "",
+          "created_at": 1784993804,
+          "definition": {
+            "kind": "prompt",
+            "model": "gpt-4o",
+            "instructions": "You are a destination recommendation expert that helps travelers find ideal vacation spots based on their preferences, budget, and travel dates. Analyze the user's preferences carefully and suggest 1-3 destinations with a brief explanation of why each is suitable. ",
+            "tools": [
+              {
+                "type": "web_search"
+              }
+            ]
+          },
+          "draft": false,
+          "status": "active",
+          "instance_identity": {
+            "principal_id": "3cf60e81-8633-4663-b1bb-99cdb4140536",
+            "client_id": "3cf60e81-8633-4663-b1bb-99cdb4140536"
+          },
+          "blueprint": {
+            "principal_id": "860d63ac-4f32-49c6-8f86-eef9b6808e2b",
+            "client_id": "437c0c90-7dfa-47e6-8cf6-f369a40c2682"
+          },
+          "blueprint_reference": {
+            "type": "ManagedAgentIdentityBlueprint",
+            "blueprint_id": "destination-25daf"
+          },
+          "agent_guid": "25daf300-bedb-4ee3-baa1-5ee1aea5b328"
+        }
+      }
+    }
+  ],
+  "first_id": "local",
+  "last_id": "destination",
+  "has_more": false,
+  "object": "list"
+}

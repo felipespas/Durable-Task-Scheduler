@@ -134,13 +134,27 @@ public class TravelPlannerOrchestrator
         ApprovalResponse approvalResponse;
         try
         {
-            // Update the waiting for approval status with more structured data including the full dailyPlan and local recommendations
+            // Keep custom status compact to stay under Durable Functions' 16KB UTF-16 limit.
+            // var firstAttraction = localRecommendations.Attractions.FirstOrDefault();
+            // var firstRestaurant = localRecommendations.Restaurants.FirstOrDefault();
+
             var waitingStatus = new {
                 step = "WaitingForApproval",
                 message = "Waiting for your approval of the travel plan...",
                 progress = 90,
                 destination = topDestination.DestinationName,
                 documentUrl = documentUrl,
+                // travelPlan = new {
+                //     destination = topDestination.DestinationName,
+                //     dates = itinerary.TravelDates,
+                //     cost = itinerary.EstimatedTotalCost,
+                //     days = itinerary.DailyPlan.Count,
+                //     attractionCount = localRecommendations.Attractions.Count,
+                //     restaurantCount = localRecommendations.Restaurants.Count,
+                //     firstAttraction = firstAttraction?.Name,
+                //     firstRestaurant = firstRestaurant?.Name
+                // }
+
                 travelPlan = new {
                     destination = topDestination.DestinationName,
                     dates = itinerary.TravelDates,

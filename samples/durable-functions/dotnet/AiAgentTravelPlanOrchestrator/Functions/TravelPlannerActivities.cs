@@ -130,7 +130,7 @@ public class TravelPlannerActivities
     }
 
     [Function(nameof(RequestApproval))]
-    public ApprovalRequest RequestApproval(
+    public Task RequestApproval(
         [ActivityTrigger] ApprovalRequest request)
     {
         _logger.LogInformation("Requesting approval for travel plan for user {UserName}, instance {InstanceId}", 
@@ -141,8 +141,8 @@ public class TravelPlannerActivities
         // For demo purposes, we'll just log the request and return it.
         
         _logger.LogInformation("Approval URL: https://your-approval-app/approve?id={InstanceId}", request.InstanceId);
-        
-        return request;
+
+        return Task.CompletedTask;
     }
 
     [Function(nameof(BookTrip))]

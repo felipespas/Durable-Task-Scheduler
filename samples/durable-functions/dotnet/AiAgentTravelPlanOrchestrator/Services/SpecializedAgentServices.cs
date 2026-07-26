@@ -32,6 +32,11 @@ public class DestinationRecommenderService : BaseAgentService
                         $"Format the response as a JSON object with a 'recommendations' array containing objects with 'destinationName', " +
                         $"'description', 'reasoning', and 'matchScore' (0-100) properties.";
 
+            // Log the prompt for debugging
+            Logger.LogInformation($"[DEBUG-DESTINATION] Agent ID: {AgentId}");
+            Logger.LogInformation($"[DEBUG-DESTINATION] Env Var: {AgentIdEnvVar} = {Environment.GetEnvironmentVariable(AgentIdEnvVar) ?? "NOT SET"}");
+            Logger.LogInformation($"[DEBUG-DESTINATION] Connection available: {!string.IsNullOrEmpty(ConnectionString)}");
+
             // Get agent response
             var output = await GetAgentResponseAsync(prompt);
             
